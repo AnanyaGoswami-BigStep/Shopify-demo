@@ -14,7 +14,7 @@ import { Routes } from '@interfaces/routes.interface';
 import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
 import '@shopify/shopify-api/adapters/node';
-import { shopifyApi, ApiVersion } from '@shopify/shopify-api';
+import { shopifyApi, ApiVersion, CookieNotFound } from '@shopify/shopify-api';
 
 const shopify = shopifyApi({
   // The next 4 values are typically read from environment variables for added security
@@ -24,6 +24,7 @@ const shopify = shopifyApi({
   hostName: 'bf69-110-235-229-230.ngrok-free.app',
   apiVersion: ApiVersion.Unstable,
   isEmbeddedApp: true,
+  /* isCustomStoreApp: true, */
 });
 
 class App {
@@ -89,20 +90,27 @@ class App {
       await shopify.auth.begin({
         shop: shopify.utils.sanitizeShop(req.query.shop as string, true),
         callbackPath: '/api/auth/callback',
-        isOnline: false,
+        isOnline: true,
         rawRequest: req,
         rawResponse: res,
       });
     });
     this.app.get('/api/auth/callback', async (req, res) => {
-      console.log('inside call back');
-      const callback = await shopify.auth.callback({
-        rawRequest: req,
-        rawResponse: res,
-      });
-      console.log(callback, 'callback');
+      try {
+        console.log('inside call back', req, res);
+        const callback = await shopify.auth.callback({
+          rawRequest: req,
+          rawResponse: res,
+        });
+        console.log(callback, 'callback');
 
-      res.redirect('https://xbots.techouts.com/');
+        res.redirect('https://xbots.techouts.com/');
+      } catch (e) {
+        if (e instanceof CookieNotFound) {
+          console.log(e, 'error');
+          res.redirect('https://xbots.techouts.com/');
+        }
+      }
     });
   }
 
