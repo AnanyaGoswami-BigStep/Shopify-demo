@@ -21,7 +21,7 @@ const shopify = shopifyApi({
   apiKey: 'b49a4695c63d915257b18ee3cc059d03',
   apiSecretKey: 'bcecd3171ed8b69f3fd07f509fa048c1',
   scopes: ['read_products'],
-  hostName: 'https://bf69-110-235-229-230.ngrok-free.app',
+  hostName: 'bf69-110-235-229-230.ngrok-free.app',
   apiVersion: ApiVersion.Unstable,
   isEmbeddedApp: true,
 });
@@ -96,19 +96,14 @@ class App {
     });
     this.app.get('/api/auth/callback', async (req, res) => {
       console.log('inside call back');
-      // The library will automatically set the appropriate HTTP headers
       const callback = await shopify.auth.callback({
         rawRequest: req,
         rawResponse: res,
       });
-
-      // You can now use callback.session to make API requests
       console.log(callback, 'callback');
 
-      res.redirect('/');
+      res.redirect('https://xbots.techouts.com/');
     });
-    /* const state = shopify.auth.nonce();
-    console.log(state); */
   }
 
   private initializeSwagger() {
