@@ -15,17 +15,22 @@ import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
 import '@shopify/shopify-api/adapters/node';
 import { shopifyApi, ApiVersion, CookieNotFound } from '@shopify/shopify-api';
+import { MongoDBSessionStorage } from '@shopify/shopify-app-session-storage-mongodb';
+import { restResources } from '@shopify/shopify-api/rest/admin/2023-04';
 
 const shopify = shopifyApi({
   // The next 4 values are typically read from environment variables for added security
   apiKey: 'b49a4695c63d915257b18ee3cc059d03',
   apiSecretKey: 'bcecd3171ed8b69f3fd07f509fa048c1',
   scopes: ['read_products'],
-  hostName: '0a10-110-235-229-229.ngrok-free.app',
+  hostName: '4ddd-110-235-229-229.ngrok-free.app',
   apiVersion: ApiVersion.Unstable,
   isEmbeddedApp: false,
+  restResources,
   /* isCustomStoreApp: true, */
 });
+
+const mongosession = new MongoDBSessionStorage('mongodb://127.0.0.1:27017/', 'shopify');
 
 class App {
   public app: express.Application;
@@ -103,12 +108,24 @@ class App {
           rawResponse: res,
         });
         console.log(callback, 'callback');
+        mongosession.storeSession(callback.session as any);
 
         res.redirect('https://xbots.techouts.com/');
       } catch (e) {
         if (e instanceof CookieNotFound) {
           console.log(e, 'error');
         }
+      }
+    });
+    this.app.get('/api/getproducts', async (req, res) => {
+      try {
+        const session = await mongosession.findSessionsByShop('quick-start-5458122e.myshopify.com');
+        const abc = session[2];
+        const products = await shopify.rest.Product.all({ session: session[2] } as any);
+        console.log(products, 'products');
+        await res.send(products);
+      } catch (e) {
+        console.log(e, 'error');
       }
     });
   }
