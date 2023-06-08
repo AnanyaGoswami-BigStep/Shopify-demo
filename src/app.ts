@@ -21,9 +21,9 @@ const shopify = shopifyApi({
   apiKey: 'b49a4695c63d915257b18ee3cc059d03',
   apiSecretKey: 'bcecd3171ed8b69f3fd07f509fa048c1',
   scopes: ['read_products'],
-  hostName: 'bf69-110-235-229-230.ngrok-free.app',
+  hostName: '0a10-110-235-229-229.ngrok-free.app',
   apiVersion: ApiVersion.Unstable,
-  isEmbeddedApp: true,
+  isEmbeddedApp: false,
   /* isCustomStoreApp: true, */
 });
 
@@ -108,7 +108,6 @@ class App {
       } catch (e) {
         if (e instanceof CookieNotFound) {
           console.log(e, 'error');
-          res.redirect('https://xbots.techouts.com/');
         }
       }
     });
